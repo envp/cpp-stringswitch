@@ -2,7 +2,7 @@ include(CTest)
 
 set(
   TEST_SOURCES
-  test_stringswitch_creation.cpp
+  test_stringswitch.cpp
 )
 
 foreach(TEST_SOURCE ${TEST_SOURCES})
