@@ -23,7 +23,7 @@ template <bool state>
 class ParamBoundTag : public std::bool_constant<state> {};
 
 // A type tag wrapping a boolean that tracks if a default has been set on the
-// string switch.
+// stringswitch.
 //
 // If a default has been set (by calling `.on_default`), the wrapped boolean is
 // `true`, otherwise it is `false`.
@@ -33,6 +33,16 @@ class DefaultBoundTag : public std::bool_constant<state> {};
 template <class Result, class ParamStateTag = void, class ResultStateTag = void>
 class StringSwitchImpl;
 
+/// Terminal state, that knows about parameters as well as defaults assocaited
+/// with the stringswitch.
+///
+/// This performs the following validations:
+///
+/// * `on_default` is called at most once
+/// * `evaluate(...)` must use the correct number of arguments.
+///
+/// Allows users to set up cases (using `StringSwitchImpl::when`) or defaults
+/// (using `StringSwitchImpl::on_default`).
 template <class Result, bool param_given, bool default_given>
 class StringSwitchImpl<Result, ParamBoundTag<param_given>,
                        DefaultBoundTag<default_given>> {
@@ -45,28 +55,29 @@ public:
   using SelfWithDefault = StringSwitchImpl<Result, ParamBoundTag<param_given>,
                                            DefaultBoundTag<state>>;
 
-  /// Associate the paramter  `label` to the Outcome `r`. If the parameter used
-  /// to evaluate the string switch matchee `p`, `r` will be returned.
+  /// Associate the paramter  `label` to the Outcome `result`.
+  /// If the parameter used to evaluate the stringswitch matches the label
+  /// provided here, `result` will be returned.
   SelfWithDefault<default_given> &when(std::string_view label, Result result) {
     this->d_mapping.emplace(std::make_pair(label, result));
     return *this;
   }
 
-  /// Set a default to use when evaluating the string switch.
+  /// Set a default to use when evaluating the stringswitch.
   SelfWithDefault<true> on_default(Result default_result)
   requires(!default_given)
   {
     return SelfWithDefault<true>{d_mapping, d_param, default_result};
   }
 
-  /// Evaluate the string switch with the given parameter.
+  /// Evaluate the stringswitch with the given parameter.
   EffectiveResultType evaluate(std::string_view param) const
   requires(!param_given)
   {
     return evaluate_impl(std::string(param));
   }
 
-  /// Evaluate the string switch using the parameter provided during creation.
+  /// Evaluate the stringswitch using the parameter provided during creation.
   EffectiveResultType evaluate() const
   requires(param_given)
   {
@@ -112,7 +123,7 @@ private:
   OutcomeStorage d_default_outcome;
 };
 
-/// An intermediate state in the string switch state machine.
+/// An intermediate state in the stringswitch state machine.
 ///
 /// This only has knowledge about whether a paramater to evaluate the string
 /// switch exists or not.
