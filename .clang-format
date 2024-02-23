@@ -1,0 +1,9 @@
+---
+BasedOnStyle: LLVM
+InsertNewlineAtEOF: Yes
+ColumnLimit: 80
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+PackConstructorInitializers: CurrentLine
+IndentRequires: false
+...
